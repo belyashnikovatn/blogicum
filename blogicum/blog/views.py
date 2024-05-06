@@ -28,6 +28,21 @@ class ProfileDetailView(LoginRequiredMixin, DetailView):
     model = User
     template_name = 'blog/profile.html'
 
+    def get_object(self):
+        return get_object_or_404(User, username=self.kwargs['username'])
+
+    # def get_slug_field(self):
+    #     return 'user__username'
+
+    # def get_object(self):
+    #     profile = get_object_or_404(User, username=self.kwargs['slug'])
+    #     return 
+    # def get_context_data(self, *args, **kwargs):
+    #     context = super().get_context_data(*args, **kwargs)
+    #     profile = get_object_or_404(User, username=self.kwargs['username'])
+    #     context['profile'] = profile
+    #     return context
+
 
 # def index(request):
 #     template = 'blog/index.html'
