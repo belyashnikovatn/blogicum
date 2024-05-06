@@ -26,7 +26,13 @@ SECRET_KEY = 'django-insecure-clnso%+f+^w&mnp80=i*s++31lxtcfdtl)no2vo@65^t655!7v
 # DEBUG = False
 DEBUG = True
 
-# ALLOWED_HOSTS = ['.localhost', '127.0.0.1*', '[::1]']
+# ALLOWED_HOSTS = [
+#     '.localhost',
+#     '127.0.0.1*',
+#     '[::1]',
+#     'localhost',
+#     '127.0.0.1',
+# ]
 ALLOWED_HOSTS = []
 
 
@@ -138,4 +144,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
-CSRF_FAILURE_VIEW = 'core.views.csrf_failure' 
+CSRF_FAILURE_VIEW = 'core.views.csrf_failure'
