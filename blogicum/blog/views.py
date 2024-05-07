@@ -54,7 +54,7 @@ class PostDeleteView(LoginRequiredMixin, DeleteView):
 class PostDetailView(LoginRequiredMixin, DetailView):
     model = Post
     template_name = 'blog/detail.html'
-    success_url = reverse_lazy('blog:index')
+    # success_url = reverse_lazy('blog:index')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -90,6 +90,16 @@ class ProfileDetailView(LoginRequiredMixin, DetailView):
     model = User
     template_name = 'blog/profile.html'
 
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     context['profile'] = get_object_or_404(User, username=self.kwargs['username'])
+    #     return context
+
+    # def get_object(self):
+    #     profile = get_object_or_404(User, username=self.kwargs['username'])
+    #     context['profile'] = (self.object.User.all('author'))
+    #     return context 
+    
     def get_object(self):
         return get_object_or_404(User, username=self.kwargs['username'])
 
