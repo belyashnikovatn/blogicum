@@ -1,4 +1,4 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404, render
 from django.views.generic import CreateView, DetailView, ListView
@@ -8,6 +8,13 @@ from blog.models import Category, Post
 
 
 User = get_user_model()
+
+
+class OnlyAuthorMixin(UserPassesTestMixin):
+
+    def test_func(self):
+        object = self.get_object()
+        return object.author == self.request.user
 
 
 class PostListView(ListView):
@@ -22,6 +29,11 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     fields = '__all__'
     template_name = 'blog/create.html'
     success_url = reverse_lazy('blog:index')
+
+
+class PostDetailView(LoginRequiredMixin, DetailView):
+    model = Post
+    template_name = 'blog/detail.html'
 
 
 class ProfileDetailView(LoginRequiredMixin, DetailView):
@@ -53,16 +65,16 @@ class ProfileDetailView(LoginRequiredMixin, DetailView):
 #     return render(request, template, context)
 
 
-def post_detail(request, pk):
-    template = 'blog/detail.html'
-    post = get_object_or_404(
-        Post.published.all(),
-        pk=pk
-    )
-    context = {
-        'post': post
-    }
-    return render(request, template, context)
+# def post_detail(request, pk):
+#     template = 'blog/detail.html'
+#     post = get_object_or_404(
+#         Post.published.all(),
+#         pk=pk
+#     )
+#     context = {
+#         'post': post
+#     }
+#     return render(request, template, context)
 
 
 def category_posts(request, category_slug):
