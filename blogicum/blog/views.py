@@ -91,6 +91,16 @@ class ProfileDetailView(LoginRequiredMixin, DetailView):
     template_name = 'blog/profile.html'
 
     # def get_context_data(self, **kwargs):
+    #     # users = User.objects.all()
+    #     context = super().get_context_data(**kwargs)
+    #     page_user = get_object_or_404(User, username=self.kwargs['username'])
+    #     context['profile'] = page_user
+    #     return context
+
+    def get_object(self):
+        return get_object_or_404(User, username=self.kwargs['username'])
+    
+    # def get_context_data(self, **kwargs):
     #     context = super().get_context_data(**kwargs)
     #     context['profile'] = get_object_or_404(User, username=self.kwargs['username'])
     #     return context
@@ -100,8 +110,6 @@ class ProfileDetailView(LoginRequiredMixin, DetailView):
     #     context['profile'] = (self.object.User.all('author'))
     #     return context 
     
-    def get_object(self):
-        return get_object_or_404(User, username=self.kwargs['username'])
 
     # def get_slug_field(self):
     #     return 'user__username'
