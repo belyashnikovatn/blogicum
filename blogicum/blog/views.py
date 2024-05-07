@@ -1,11 +1,13 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404, render
-from django.views.generic import CreateView, DetailView, ListView
-from django.urls import reverse_lazy
+from django.views.generic import (
+    CreateView, DeleteView, DetailView, ListView, UpdateView
+)
+from django.urls import reverse_lazy, reverse
 
-from blog.forms import PostForm
-from blog.models import Category, Post
+from blog.forms import PostForm, CommentForm
+from blog.models import Category, Post, Comment
 
 
 User = get_user_model()
@@ -32,15 +34,56 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy('blog:index')
 
     def form_valid(self, form):
-        # Присвоить полю author объект пользователя из запроса.
         form.instance.author = self.request.user
-        # Продолжить валидацию, описанную в форме.
         return super().form_valid(form)
+
+
+class PostUpdateView(LoginRequiredMixin, UpdateView):
+    model = Post
+    form_class = PostForm
+    template_name = 'blog/detail.html'
+    success_url = reverse_lazy('blog:index')
+
+
+class PostDeleteView(LoginRequiredMixin, DeleteView):
+    model = Post
+    template_name = 'blog/detail.html'
+    success_url = reverse_lazy('blog:index')
 
 
 class PostDetailView(LoginRequiredMixin, DetailView):
     model = Post
     template_name = 'blog/detail.html'
+    success_url = reverse_lazy('blog:index')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = CommentForm()
+        context['comments'] = (
+            self.object.comments.select_related('author')
+        )
+        return context
+
+
+class CommentCreateView(LoginRequiredMixin, CreateView):
+    post = None
+    model = Comment
+    form_class = CommentForm
+
+    def dispatch(self, request, *args, **kwargs):
+        self.post = get_object_or_404(Post, pk=kwargs['pk'])
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        form.instance.post = self.post
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('post:detail', kwargs={'pk': self.post.pk})
+
+
+"""POST DONE"""
 
 
 class ProfileDetailView(LoginRequiredMixin, DetailView):
