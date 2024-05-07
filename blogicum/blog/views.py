@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404, render
 from django.views.generic import CreateView, DetailView, ListView
 from django.urls import reverse_lazy
 
+from blog.forms import PostForm
 from blog.models import Category, Post
 
 
@@ -26,9 +27,15 @@ class PostListView(ListView):
 
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
-    fields = '__all__'
+    form_class = PostForm
     template_name = 'blog/create.html'
     success_url = reverse_lazy('blog:index')
+
+    def form_valid(self, form):
+        # Присвоить полю author объект пользователя из запроса.
+        form.instance.author = self.request.user
+        # Продолжить валидацию, описанную в форме.
+        return super().form_valid(form)
 
 
 class PostDetailView(LoginRequiredMixin, DetailView):
