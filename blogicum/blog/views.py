@@ -102,45 +102,44 @@ def add_comment(request, pk):
 
 @login_required
 def edit_comment(request, pk, comment_id):
-    comment = get_object_or_404(Comment, pk=comment_id)
-    if comment.author != request.user:
-        return redirect('blog:post_detail', pk)
-    form = CommentForm(
-        request.POST or None,
-        files=request.FILES or None,
-        instance=comment)
+    instance = get_object_or_404(Comment, pk=comment_id)
+    # if comment.author != request.user:
+    #     return redirect('blog:post_detail', pk)
+    form = CommentForm(request.POST or None, instance=instance)
+    context = {'form': form}
     if form.is_valid():
         form.save()
         return redirect('blog:post_detail', pk=pk)
-    template = 'blog/create.html'
-    context = {'form': form,
-               'comment': comment}
-    return render(request, template, context)
+    return render(request, 'blog/create.html', context)
 
 
 @login_required
 def delete_comment(request, pk, comment_id):
-    comment = get_object_or_404(Comment, comment_id)
-    comment.delete()
-    return render(request, 'blog:index')
+    instance = get_object_or_404(Comment, pk=comment_id)
+    form = CommentForm(request.POST or None, instance=instance)
+    context = {'form': form}
+    if request.method == 'POST':
+        instance.delete()
+        return redirect('blog:post_detail', pk=pk)
+    return render(request, 'blog/create.html', context)
 
 
-class CommentCreateView(LoginRequiredMixin, CreateView):
-    object = None
-    model = Comment
-    form_class = CommentForm
+# class CommentCreateView(LoginRequiredMixin, CreateView):
+#     object = None
+#     model = Comment
+#     form_class = CommentForm
 
-    def dispatch(self, request, *args, **kwargs):
-        self.object = get_object_or_404(Post, pk=kwargs['pk'])
-        return super().dispatch(request, *args, **kwargs)
+#     def dispatch(self, request, *args, **kwargs):
+#         self.object = get_object_or_404(Post, pk=kwargs['pk'])
+#         return super().dispatch(request, *args, **kwargs)
 
-    def form_valid(self, form):
-        form.instance.author = self.request.user
-        form.instance.object = self.object
-        return super().form_valid(form)
+#     def form_valid(self, form):
+#         form.instance.author = self.request.user
+#         form.instance.object = self.object
+#         return super().form_valid(form)
 
-    def get_success_url(self):
-        return reverse('post:detail', kwargs={'pk': self.object.pk})
+#     def get_success_url(self):
+#         return reverse('post:detail', kwargs={'pk': self.object.pk})
 
 
 """POST DONE"""
