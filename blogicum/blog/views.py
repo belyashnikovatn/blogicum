@@ -16,6 +16,13 @@ from blog.models import Category, Post, Comment
 User = get_user_model()
 
 
+class OnlyUserMixin(UserPassesTestMixin):
+
+    def test_func(self):
+        object = self.get_object()
+        return object == self.request.user
+
+
 class OnlyAuthorMixin(UserPassesTestMixin):
 
     def test_func(self):
@@ -110,15 +117,12 @@ def delete_comment(request, pk, comment_id):
 """POST DONE"""
 
 
-
-
 class ProfileDetailView(LoginRequiredMixin, DetailView):
     model = User
-    form_class = ProfileForm
+    # form_class = ProfileForm
     template_name = 'blog/profile.html'
     # context_object_name = 'user'
     # queryset = User.objects.all()
-    paginate_by = 10
 
     def get_object(self):
         # return get_object_or_404(User, username=self.kwargs['username'])
@@ -135,9 +139,20 @@ class ProfileDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
-class CurrentUserDetailView(ProfileDetailView):
+class ProfileUpdateView(LoginRequiredMixin, OnlyUserMixin, UpdateView):
+    model = User
+    form_class = ProfileForm
+    template_name = 'blog/user.html'
+    # success_url = reverse_lazy('blog:profile', id=username)
+
     def get_object(self):
-        return self.request.user
+        return get_object_or_404(User, id=self.request.user.id)
+
+    def get_success_url(self):
+        return reverse(
+            'blog:profile',
+            kwargs={'username': get_object_or_404(User, id=self.request.user.id)}
+        )
 
 
 # class ProfileDetailView(LoginRequiredMixin, DetailView):
