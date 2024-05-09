@@ -119,19 +119,14 @@ def delete_comment(request, pk, comment_id):
 
 class ProfileDetailView(LoginRequiredMixin, DetailView):
     model = User
-    # form_class = ProfileForm
     template_name = 'blog/profile.html'
-    # context_object_name = 'user'
-    # queryset = User.objects.all()
 
     def get_object(self):
-        # return get_object_or_404(User, username=self.kwargs['username'])
-        return get_object_or_404(User, username=self.kwargs.get('username'))
-        # return get_object_or_404(User, pk=username)
+        return get_object_or_404(User, username=self.kwargs['username'])
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form'] = ProfileForm()
+        context['user'] = get_object_or_404(User, id=self.request.user.id)
         context['profile'] = get_object_or_404(User, username=self.kwargs['username'])
         context['page_obj'] = (
             self.object.posts.select_related('author')
@@ -143,7 +138,6 @@ class ProfileUpdateView(LoginRequiredMixin, OnlyUserMixin, UpdateView):
     model = User
     form_class = ProfileForm
     template_name = 'blog/user.html'
-    # success_url = reverse_lazy('blog:profile', id=username)
 
     def get_object(self):
         return get_object_or_404(User, id=self.request.user.id)
@@ -153,64 +147,6 @@ class ProfileUpdateView(LoginRequiredMixin, OnlyUserMixin, UpdateView):
             'blog:profile',
             kwargs={'username': get_object_or_404(User, id=self.request.user.id)}
         )
-
-
-# class ProfileDetailView(LoginRequiredMixin, DetailView):
-#     model = User
-#     # form_class = UserChangeForm
-#     template_name = 'blog/profile.html'
-
-#     def get_object(self):
-#         return get_object_or_404(User, username=self.kwargs['username'])
-
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     context['profile'] = get_object_or_404(User, username=self.kwargs['username'])
-    #     # context['posts'] = self.object.posts.filter(author__username=self.kwargs['username'])
-
-    #     return context
-
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     context['profile'] = get_object_or_404(User, username=self.kwargs['username'])
-    #     return context
-
-
-    # def get_context_data(self, **kwargs):
-    #     # users = User.objects.all()
-    #     context = super().get_context_data(**kwargs)
-    #     page_user = get_object_or_404(User, username=self.kwargs['username'])
-    #     context['profile'] = page_user
-    #     return context
-
-    # def get_object(self):
-    #     return get_object_or_404(User, username=self.kwargs['username'])
-    
-    
-    
-    
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     context['profile'] = get_object_or_404(User, username=self.kwargs['username'])
-    #     return context
-
-    # def get_object(self):
-    #     profile = get_object_or_404(User, username=self.kwargs['username'])
-    #     context['profile'] = (self.object.User.all('author'))
-    #     return context 
-    
-
-    # def get_slug_field(self):
-    #     return 'user__username'
-
-    # def get_object(self):
-    #     profile = get_object_or_404(User, username=self.kwargs['slug'])
-    #     return 
-    # def get_context_data(self, *args, **kwargs):
-    #     context = super().get_context_data(*args, **kwargs)
-    #     profile = get_object_or_404(User, username=self.kwargs['username'])
-    #     context['profile'] = profile
-    #     return context
 
 
 # def index(request):
