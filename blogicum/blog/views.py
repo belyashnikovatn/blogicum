@@ -45,13 +45,14 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 class PostUpdateView(LoginRequiredMixin, OnlyAuthorMixin, UpdateView):
     model = Post
     form_class = PostForm
-    template_name = 'blog/detail.html'
+    template_name = 'blog/create.html'
     success_url = reverse_lazy('blog:index')
 
 
 class PostDeleteView(LoginRequiredMixin, OnlyAuthorMixin, DeleteView):
     model = Post
-    template_name = 'blog/detail.html'
+    form_class = PostForm
+    template_name = 'blog/create.html'
     success_url = reverse_lazy('blog:index')
 
 
@@ -109,20 +110,34 @@ def delete_comment(request, pk, comment_id):
 """POST DONE"""
 
 
-class ProfileDetailView(LoginRequiredMixin, UpdateView):
+
+
+class ProfileDetailView(LoginRequiredMixin, DetailView):
     model = User
     form_class = ProfileForm
     template_name = 'blog/profile.html'
     # context_object_name = 'user'
-    queryset = User.objects.all()
+    # queryset = User.objects.all()
+    paginate_by = 10
+
     def get_object(self):
-        return get_object_or_404(User, username=self.kwargs['username'])
-    
+        # return get_object_or_404(User, username=self.kwargs['username'])
+        return get_object_or_404(User, username=self.kwargs.get('username'))
+        # return get_object_or_404(User, pk=username)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['form'] = ProfileForm()
         context['profile'] = get_object_or_404(User, username=self.kwargs['username'])
+        context['page_obj'] = (
+            self.object.posts.select_related('author')
+        )
         return context
+
+
+class CurrentUserDetailView(ProfileDetailView):
+    def get_object(self):
+        return self.request.user
 
 
 # class ProfileDetailView(LoginRequiredMixin, DetailView):
