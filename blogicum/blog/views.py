@@ -1,12 +1,16 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.contrib.auth.forms import UserChangeForm
+from django.core.paginator import Paginator
 
 from django.contrib.auth.decorators import login_required
+from django.db.models.base import Model as Model
+from django.db.models.query import QuerySet
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic import (
     CreateView, DeleteView, DetailView, ListView, UpdateView
 )
+from django.views.generic.list import MultipleObjectMixin
+
 from django.urls import reverse_lazy, reverse
 
 from blog.forms import PostForm, CommentForm, ProfileForm
@@ -120,18 +124,28 @@ def delete_comment(request, pk, comment_id):
 class ProfileDetailView(LoginRequiredMixin, DetailView):
     model = User
     template_name = 'blog/profile.html'
+    # post_list = Post.published.select_related('category')
 
     def get_object(self):
         return get_object_or_404(User, username=self.kwargs['username'])
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        posts = self.get_related_posts()
         context['user'] = get_object_or_404(User, id=self.request.user.id)
         context['profile'] = get_object_or_404(User, username=self.kwargs['username'])
-        context['page_obj'] = (
-            self.object.posts.select_related('author')
-        )
+        context['page_obj'] = posts
         return context
+
+    def get_related_posts(self):
+        if self.request.user.id == self.object.id:
+            queryset = self.object.posts.all().select_related('category')
+        else:
+            queryset = self.object.posts(manager='published').select_related('category')
+        paginator = Paginator(queryset, 2)
+        page = self.request.GET.get('page')
+        posts = paginator.get_page(page)
+        return posts
 
 
 class ProfileUpdateView(LoginRequiredMixin, OnlyUserMixin, UpdateView):
@@ -145,7 +159,9 @@ class ProfileUpdateView(LoginRequiredMixin, OnlyUserMixin, UpdateView):
     def get_success_url(self):
         return reverse(
             'blog:profile',
-            kwargs={'username': get_object_or_404(User, id=self.request.user.id)}
+            kwargs={
+                'username': get_object_or_404(User, id=self.request.user.id)
+            }
         )
 
 
