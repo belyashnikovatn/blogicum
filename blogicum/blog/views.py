@@ -18,6 +18,7 @@ from blog.models import Category, Post, Comment
 
 
 User = get_user_model()
+PAGE_COUNT = 10
 
 
 class OnlyUserMixin(UserPassesTestMixin):
@@ -36,10 +37,48 @@ class OnlyAuthorMixin(UserPassesTestMixin):
 
 class PostListView(ListView):
     model = Post
-    # queryset = Post.objects.prefetch_related('comments').select_related('author')
     ordering = 'id'
-    paginate_by = 10
+    paginate_by = PAGE_COUNT
     template_name = 'blog/index.html'
+
+
+def category_posts(request, category_slug):
+    category = get_object_or_404(
+        Category.objects.filter(
+            is_published=True,
+            slug=category_slug
+        )
+    )
+    post_list = category.posts(manager='published').all()
+    paginator = Paginator(post_list, PAGE_COUNT)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    template = 'blog/category.html'
+    context = {
+        'category': category,
+        'page_obj': page_obj
+    }
+    return render(request, template, context)
+
+
+# class PostCategoryListView(ListView):
+#     model = Post
+#     # queryset = Post.objects.select_related('category')
+#     # queryset = get_object_or_404(Category, slug=['category_slug'])
+#     ordering = 'id'
+#     # paginate_by = PAGE_COUNT
+#     template_name = 'blog/category.html'
+
+#     def get_queryset(self):
+#         return get_object_or_404(Category, slug=self.kwargs['category_slug'])
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['category'] = get_object_or_404(Category, slug=self.kwargs['category_slug'])
+#         # context['page_obj'] = get_object_or_404(
+#         #     Post.objects.all()
+#         # )
+#         return context
 
 
 class PostCreateView(LoginRequiredMixin, CreateView):
@@ -124,7 +163,6 @@ def delete_comment(request, pk, comment_id):
 class ProfileDetailView(LoginRequiredMixin, DetailView):
     model = User
     template_name = 'blog/profile.html'
-    # post_list = Post.published.select_related('category')
 
     def get_object(self):
         return get_object_or_404(User, username=self.kwargs['username'])
@@ -139,10 +177,10 @@ class ProfileDetailView(LoginRequiredMixin, DetailView):
 
     def get_related_posts(self):
         if self.request.user.id == self.object.id:
-            queryset = self.object.posts.all().select_related('category')
+            queryset = self.object.posts.all().select_related('category', 'location')
         else:
-            queryset = self.object.posts(manager='published').select_related('category')
-        paginator = Paginator(queryset, 2)
+            queryset = self.object.posts(manager='published').select_related('category', 'location')
+        paginator = Paginator(queryset, PAGE_COUNT)
         page = self.request.GET.get('page')
         posts = paginator.get_page(page)
         return posts
@@ -186,17 +224,4 @@ class ProfileUpdateView(LoginRequiredMixin, OnlyUserMixin, UpdateView):
 #     return render(request, template, context)
 
 
-def category_posts(request, category_slug):
-    category = get_object_or_404(
-        Category.objects.filter(
-            is_published=True,
-            slug=category_slug
-        )
-    )
-    post_list = category.posts(manager='published').all()
-    template = 'blog/category.html'
-    context = {
-        'category': category,
-        'post_list': post_list
-    }
-    return render(request, template, context)
+
