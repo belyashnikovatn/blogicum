@@ -61,26 +61,6 @@ def category_posts(request, category_slug):
     return render(request, template, context)
 
 
-# class PostCategoryListView(ListView):
-#     model = Post
-#     # queryset = Post.objects.select_related('category')
-#     # queryset = get_object_or_404(Category, slug=['category_slug'])
-#     ordering = 'id'
-#     # paginate_by = PAGE_COUNT
-#     template_name = 'blog/category.html'
-
-#     def get_queryset(self):
-#         return get_object_or_404(Category, slug=self.kwargs['category_slug'])
-
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['category'] = get_object_or_404(Category, slug=self.kwargs['category_slug'])
-#         # context['page_obj'] = get_object_or_404(
-#         #     Post.objects.all()
-#         # )
-#         return context
-
-
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
     form_class = PostForm
