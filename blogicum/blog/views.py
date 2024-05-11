@@ -5,6 +5,7 @@ from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.db.models.base import Model as Model
 from django.db.models.query import QuerySet
+from django.db.models import Count
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic import (
     CreateView, DeleteView, DetailView, ListView, UpdateView
@@ -36,29 +37,54 @@ class OnlyAuthorMixin(UserPassesTestMixin):
 
 
 class PostListView(ListView):
-    model = Post
-    ordering = 'id'
+    # context_object_name = 'page_obj'
     paginate_by = PAGE_COUNT
     template_name = 'blog/index.html'
 
+    def get_queryset(self):
+        return Post.published.select_related(
+            'category', 'location', 'author'
+        ).annotate(comment_count=Count('comments'))
 
-def category_posts(request, category_slug):
-    category = get_object_or_404(
-        Category.objects.filter(
-            is_published=True,
-            slug=category_slug
-        )
-    )
-    post_list = category.posts(manager='published').all()
-    paginator = Paginator(post_list, PAGE_COUNT)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    template = 'blog/category.html'
-    context = {
-        'category': category,
-        'page_obj': page_obj
-    }
-    return render(request, template, context)
+
+class CategoryPostListView(ListView):
+    paginate_by = PAGE_COUNT
+    template_name = 'blog/category.html'
+    allow_empty = False
+
+    def get_queryset(self):
+        return Post.published.filter(
+            category__slug=self.kwargs['category_slug']
+        ).select_related(
+            'category', 'location', 'author'
+        ).annotate(comment_count=Count('comments'))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['category'] = get_object_or_404(
+            Category.objects.filter(
+                is_published=True,
+                slug=self.kwargs['category_slug']))
+        return context
+
+
+# def category_posts(request, category_slug):
+#     category = get_object_or_404(
+#         Category.objects.filter(
+#             is_published=True,
+#             slug=category_slug
+#         )
+#     )
+#     post_list = category.posts(manager='published').all()
+#     paginator = Paginator(post_list, PAGE_COUNT)
+#     page_number = request.GET.get('page')
+#     page_obj = paginator.get_page(page_number)
+#     template = 'blog/category.html'
+#     context = {
+#         'category': category,
+#         'page_obj': page_obj
+#     }
+#     return render(request, template, context)
 
 
 class PostCreateView(LoginRequiredMixin, CreateView):
