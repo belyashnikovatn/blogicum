@@ -10,8 +10,6 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic import (
     CreateView, DeleteView, DetailView, ListView, UpdateView
 )
-from django.views.generic.list import MultipleObjectMixin
-
 from django.urls import reverse_lazy, reverse
 
 from blog.forms import PostForm, CommentForm, ProfileForm
@@ -37,7 +35,6 @@ class OnlyAuthorMixin(UserPassesTestMixin):
 
 
 class PostListView(ListView):
-    # context_object_name = 'page_obj'
     paginate_by = PAGE_COUNT
     template_name = 'blog/index.html'
 
@@ -68,30 +65,10 @@ class CategoryPostListView(ListView):
         return context
 
 
-# def category_posts(request, category_slug):
-#     category = get_object_or_404(
-#         Category.objects.filter(
-#             is_published=True,
-#             slug=category_slug
-#         )
-#     )
-#     post_list = category.posts(manager='published').all()
-#     paginator = Paginator(post_list, PAGE_COUNT)
-#     page_number = request.GET.get('page')
-#     page_obj = paginator.get_page(page_number)
-#     template = 'blog/category.html'
-#     context = {
-#         'category': category,
-#         'page_obj': page_obj
-#     }
-#     return render(request, template, context)
-
-
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
     form_class = PostForm
     template_name = 'blog/create.html'
-    success_url = reverse_lazy('blog:profile')
 
     def form_valid(self, form):
         form.instance.author = self.request.user
@@ -136,6 +113,7 @@ class PostDeleteView(LoginRequiredMixin, OnlyAuthorMixin, DeleteView):
 
 class PostDetailView(LoginRequiredMixin, DetailView):
     model = Post
+    paginate_by = PAGE_COUNT
     template_name = 'blog/detail.html'
 
     def get_context_data(self, **kwargs):
@@ -185,9 +163,6 @@ def delete_comment(request, pk, comment_id):
     return render(request, 'blog/create.html', context)
 
 
-"""POST DONE"""
-
-
 class ProfileDetailView(LoginRequiredMixin, DetailView):
     model = User
     template_name = 'blog/profile.html'
@@ -205,9 +180,13 @@ class ProfileDetailView(LoginRequiredMixin, DetailView):
 
     def get_related_posts(self):
         if self.request.user.id == self.object.id:
-            queryset = self.object.posts.all().select_related('category', 'location')
+            queryset = self.object.posts.all().select_related(
+                'category', 'location').annotate(
+                    comment_count=Count('comments'))
         else:
-            queryset = self.object.posts(manager='published').select_related('category', 'location')
+            queryset = self.object.posts(manager='published').select_related(
+                'category', 'location').annotate(
+                    comment_count=Count('comments'))
         paginator = Paginator(queryset, PAGE_COUNT)
         page = self.request.GET.get('page')
         posts = paginator.get_page(page)
@@ -229,27 +208,3 @@ class ProfileUpdateView(LoginRequiredMixin, OnlyUserMixin, UpdateView):
                 'username': get_object_or_404(User, id=self.request.user.id)
             }
         )
-
-
-# def index(request):
-#     template = 'blog/index.html'
-#     post_list = Post.published.select_related('category')[0:5]
-#     context = {
-#         'post_list': post_list
-#     }
-#     return render(request, template, context)
-
-
-# def post_detail(request, pk):
-#     template = 'blog/detail.html'
-#     post = get_object_or_404(
-#         Post.published.all(),
-#         pk=pk
-#     )
-#     context = {
-#         'post': post
-#     }
-#     return render(request, template, context)
-
-
-
