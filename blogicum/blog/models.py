@@ -90,6 +90,9 @@ class Post(models.Model):
     created_at = models.DateTimeField(
         auto_now_add=True, verbose_name='Добавлено'
     )
+    image = models.ImageField('Изображение',
+                              upload_to='posts_images',
+                              blank=True)
 
     objects = models.Manager()
     published = PublishedManager()
