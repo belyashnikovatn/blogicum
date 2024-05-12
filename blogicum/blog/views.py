@@ -6,15 +6,17 @@ from django.contrib.auth.decorators import login_required
 from django.db.models.base import Model as Model
 from django.db.models.query import QuerySet
 from django.db.models import Count
+from django.http.response import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic import (
     CreateView, DeleteView, DetailView, ListView, UpdateView
 )
+from django.utils import timezone
+
 from django.urls import reverse_lazy, reverse
 
 from blog.forms import PostForm, CommentForm, ProfileForm
 from blog.models import Category, Post, Comment
-
 
 User = get_user_model()
 PAGE_COUNT = 10
@@ -29,6 +31,9 @@ class OnlyUserMixin(UserPassesTestMixin):
 
 class OnlyAuthorMixin(UserPassesTestMixin):
 
+    def handle_no_permission(self):
+        return redirect('blog:post_detail', self.kwargs['pk'])
+
     def test_func(self):
         object = self.get_object()
         return object.author == self.request.user
@@ -37,11 +42,13 @@ class OnlyAuthorMixin(UserPassesTestMixin):
 class PostListView(ListView):
     paginate_by = PAGE_COUNT
     template_name = 'blog/index.html'
+    ordering = 'pub_date'
 
     def get_queryset(self):
         return Post.published.select_related(
             'category', 'location', 'author'
-        ).annotate(comment_count=Count('comments'))
+        ).annotate(comment_count=Count('comments')).order_by(
+            '-pub_date')
 
 
 class CategoryPostListView(ListView):
@@ -54,7 +61,8 @@ class CategoryPostListView(ListView):
             category__slug=self.kwargs['category_slug']
         ).select_related(
             'category', 'location', 'author'
-        ).annotate(comment_count=Count('comments'))
+        ).annotate(comment_count=Count('comments')).order_by(
+            '-pub_date')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -83,10 +91,11 @@ class PostCreateView(LoginRequiredMixin, CreateView):
         )
 
 
-class PostUpdateView(LoginRequiredMixin, OnlyAuthorMixin, UpdateView):
+class PostUpdateView(OnlyAuthorMixin, UpdateView):
     model = Post
     form_class = PostForm
     template_name = 'blog/create.html'
+    redirect_field_name = 'blog:index'
 
     def get_success_url(self):
         return reverse(
@@ -97,7 +106,7 @@ class PostUpdateView(LoginRequiredMixin, OnlyAuthorMixin, UpdateView):
         )
 
 
-class PostDeleteView(LoginRequiredMixin, OnlyAuthorMixin, DeleteView):
+class PostDeleteView(OnlyAuthorMixin, DeleteView):
     model = Post
     form_class = PostForm
     template_name = 'blog/create.html'
@@ -182,11 +191,11 @@ class ProfileDetailView(LoginRequiredMixin, DetailView):
         if self.request.user.id == self.object.id:
             queryset = self.object.posts.all().select_related(
                 'category', 'location').annotate(
-                    comment_count=Count('comments'))
+                    comment_count=Count('comments')).order_by('-pub_date')
         else:
             queryset = self.object.posts(manager='published').select_related(
                 'category', 'location').annotate(
-                    comment_count=Count('comments'))
+                    comment_count=Count('comments')).order_by('-pub_date')
         paginator = Paginator(queryset, PAGE_COUNT)
         page = self.request.GET.get('page')
         posts = paginator.get_page(page)
