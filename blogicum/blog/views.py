@@ -42,7 +42,6 @@ class OnlyAuthorMixin(UserPassesTestMixin):
 class PostListView(ListView):
     paginate_by = PAGE_COUNT
     template_name = 'blog/index.html'
-    ordering = 'pub_date'
 
     def get_queryset(self):
         return Post.published.select_related(
@@ -85,9 +84,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         return reverse(
             'blog:profile',
-            kwargs={
-                'username': get_object_or_404(User, id=self.request.user.id)
-            }
+            kwargs={'username': self.request.user}
         )
 
 
@@ -99,10 +96,8 @@ class PostUpdateView(OnlyAuthorMixin, UpdateView):
 
     def get_success_url(self):
         return reverse(
-            'blog:profile',
-            kwargs={
-                'username': get_object_or_404(User, id=self.request.user.id)
-            }
+            'blog:post_detail',
+            kwargs={'pk': self.kwargs['pk']}
         )
 
 
