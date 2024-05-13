@@ -147,6 +147,24 @@ class PostDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
+class CommentCreateView(LoginRequiredMixin, CreateView):
+    # post = None
+    model = Comment
+    form_class = CommentForm
+
+    def dispatch(self, request, *args, **kwargs):
+        self.post_obj = get_object_or_404(Post, pk=kwargs['pk'])
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        form.instance.post_id = self.post_obj.pk
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('blog:post_detail', kwargs={'pk': self.post_obj.pk})
+
+
 @login_required
 def add_comment(request, pk):
     post = get_object_or_404(Post, pk=pk)
