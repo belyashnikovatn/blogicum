@@ -1,5 +1,11 @@
+from typing import Any, Mapping
 from django import forms
 from django.contrib.auth import get_user_model
+from django.core.files.base import File
+from django.db.models.base import Model
+from django.forms.utils import ErrorList
+from django.utils import timezone
+
 
 from blog.models import Comment, Post
 
@@ -8,18 +14,22 @@ User = get_user_model()
 
 class PostForm(forms.ModelForm):
 
+    def __init__(self, *args, **kwrags):
+        super().__init__(*args, **kwrags)
+        self.fields['pub_date'].initial = timezone.localtime(
+            timezone.now()
+        ).strftime('%Y-%m-%dT%H:%M')
+
     class Meta:
         model = Post
-        fields = ('title', 'text', 'pub_date', 'location', 'category', 'image',)
+        fields = ('title', 'text', 'image', 'location', 'category', 'pub_date')
         widgets = {
-            'pub_date': forms.DateInput(
-                format='%Y-%m-%d %H:%M:%S',
+            'pub_date': forms.DateTimeInput(
+                format='%Y-%m-%dT%H:%M',
                 attrs={
-                    # 'class': 'form-control',
                     'type': 'datetime-local'
                 }
-            ),
-            'text': forms.Textarea(attrs={'cols': '22', 'rows': '5'})
+            )
         }
 
 
