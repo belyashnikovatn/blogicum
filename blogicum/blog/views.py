@@ -148,7 +148,6 @@ class PostDetailView(LoginRequiredMixin, DetailView):
 
 
 class CommentCreateView(LoginRequiredMixin, CreateView):
-    # post = None
     model = Comment
     form_class = CommentForm
 
@@ -162,32 +161,33 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse('blog:post_detail', kwargs={'pk': self.post_obj.pk})
+        return reverse_lazy('blog:post_detail', kwargs={'pk': self.post_obj.pk})
 
 
-@login_required
-def add_comment(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-    form = CommentForm(request.POST)
-    if form.is_valid():
-        comment = form.save(commit=False)
-        comment.author = request.user
-        comment.post = post
-        comment.save()
-    return redirect('blog:post_detail', pk=pk)
+class CommentUpdateView(OnlyAuthorMixin, UpdateView):
+    model = Comment
+    form_class = CommentForm
+    template_name = 'blog/comment.html'
+
+    def get_object(self):
+        return get_object_or_404(Comment, pk=self.kwargs['comment_id'])
+
+    def get_success_url(self):
+        return reverse_lazy('blog:post_detail', kwargs={'pk': self.kwargs['pk']})
 
 
-@login_required
-def edit_comment(request, pk, comment_id):
-    instance = get_object_or_404(Comment, pk=comment_id)
-    if instance.author != request.user:
-        return redirect('blog:post_detail', pk=pk)
-    form = CommentForm(request.POST or None, instance=instance)
-    context = {'form': form}
-    if form.is_valid():
-        form.save()
-        return redirect('blog:post_detail', pk=pk)
-    return render(request, 'blog/create.html', context)
+class CommentDeleteView(OnlyAuthorMixin, DeleteView):
+    model = Comment
+    form_class = CommentForm
+    template_name = 'blog/comment.html'
+
+    def get_object(self):
+        return get_object_or_404(Comment, pk=self.kwargs['comment_id'])
+
+    def get_success_url(self):
+        return reverse_lazy('blog:post_detail', kwargs={'pk': self.kwargs['pk']})
+
+
 
 
 @login_required
