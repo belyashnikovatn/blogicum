@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.paginator import Paginator
 from django.db.models import Count
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
                                   UpdateView)
@@ -176,32 +176,21 @@ class ProfileDetailView(LoginRequiredMixin, DetailView):
     model = User
     template_name = 'blog/profile.html'
 
-    def get_object(self):
-        return get_object_or_404(User, username=self.kwargs['username'])
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        posts = self.get_related_posts()
-        context['user'] = get_object_or_404(User, id=self.request.user.id)
-        context['profile'] = get_object_or_404(
-            User,
-            username=self.kwargs['username'])
-        context['page_obj'] = posts
-        return context
-
-    def get_related_posts(self):
-        if self.request.user.id == self.object.id:
-            queryset = self.object.posts.all().select_related(
+    def get(self, request):
+        profile = get_object_or_404(User, username=self.kwargs['username'])
+        if self.request.user == profile:
+            queryset = profile.posts.all().select_related(
                 'category', 'location').annotate(
                     comment_count=Count('comments')).order_by('-pub_date')
         else:
-            queryset = self.object.posts(manager='published').select_related(
+            queryset = profile.posts(manager='published').select_related(
                 'category', 'location').annotate(
                     comment_count=Count('comments')).order_by('-pub_date')
         paginator = Paginator(queryset, PAGE_COUNT)
         page = self.request.GET.get('page')
-        posts = paginator.get_page(page)
-        return posts
+        page_obj = paginator.get_page(page)
+        context = {'profile': profile, 'page_obj': page_obj}
+        return render(request, self.template_name, context)
 
 
 class ProfileUpdateView(OnlyUserMixin, UpdateView):
