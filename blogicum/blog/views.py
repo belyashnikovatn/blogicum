@@ -1,23 +1,14 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.paginator import Paginator
-
-from django.contrib.auth.decorators import login_required
-from django.db.models.base import Model as Model
-from django.db.models.query import QuerySet
 from django.db.models import Count
-from django.http import HttpRequest
-from django.http.response import HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render, redirect
-from django.views.generic import (
-    CreateView, DeleteView, DetailView, ListView, UpdateView
-)
-from django.utils import timezone
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse, reverse_lazy
+from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
+                                  UpdateView)
 
-from django.urls import reverse_lazy, reverse
-
-from blog.forms import PostForm, CommentForm, ProfileForm
-from blog.models import Category, Post, Comment
+from blog.forms import CommentForm, PostForm, ProfileForm
+from blog.models import Category, Comment, Post
 
 User = get_user_model()
 PAGE_COUNT = 10
@@ -148,7 +139,9 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse_lazy('blog:post_detail', kwargs={'pk': self.post_obj.pk})
+        return reverse_lazy(
+            'blog:post_detail',
+            kwargs={'pk': self.post_obj.pk})
 
 
 class CommentUpdateView(OnlyAuthorMixin, UpdateView):
@@ -160,7 +153,9 @@ class CommentUpdateView(OnlyAuthorMixin, UpdateView):
         return get_object_or_404(Comment, pk=self.kwargs['comment_id'])
 
     def get_success_url(self):
-        return reverse_lazy('blog:post_detail', kwargs={'pk': self.kwargs['pk']})
+        return reverse_lazy(
+            'blog:post_detail',
+            kwargs={'pk': self.kwargs['pk']})
 
 
 class CommentDeleteView(OnlyAuthorMixin, DeleteView):
@@ -172,7 +167,9 @@ class CommentDeleteView(OnlyAuthorMixin, DeleteView):
         return get_object_or_404(Comment, pk=self.kwargs['comment_id'])
 
     def get_success_url(self):
-        return reverse_lazy('blog:post_detail', kwargs={'pk': self.kwargs['pk']})
+        return reverse_lazy(
+            'blog:post_detail',
+            kwargs={'pk': self.kwargs['pk']})
 
 
 class ProfileDetailView(LoginRequiredMixin, DetailView):
@@ -186,7 +183,9 @@ class ProfileDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         posts = self.get_related_posts()
         context['user'] = get_object_or_404(User, id=self.request.user.id)
-        context['profile'] = get_object_or_404(User, username=self.kwargs['username'])
+        context['profile'] = get_object_or_404(
+            User,
+            username=self.kwargs['username'])
         context['page_obj'] = posts
         return context
 
