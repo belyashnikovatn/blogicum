@@ -10,16 +10,16 @@ class PostForm(forms.ModelForm):
 
     class Meta:
         model = Post
-        exclude = ('author',)
-        fields = '__all__'
+        fields = ('title', 'text', 'pub_date', 'location', 'category', 'image',)
         widgets = {
             'pub_date': forms.DateInput(
                 format='%Y-%m-%d %H:%M:%S',
                 attrs={
-                    'class': 'form-control',
+                    # 'class': 'form-control',
                     'type': 'datetime-local'
                 }
-            )
+            ),
+            'text': forms.Textarea(attrs={'cols': '22', 'rows': '5'})
         }
 
 

@@ -45,22 +45,24 @@ class PostListView(ListView):
 class CategoryPostListView(ListView):
     paginate_by = PAGE_COUNT
     template_name = 'blog/category.html'
-    allow_empty = False
 
     def get_queryset(self):
-        return Post.published.filter(
-            category__slug=self.kwargs['category_slug']
-        ).select_related(
+        category = get_object_or_404(Category.objects.filter(
+            is_published=True,
+            slug=self.kwargs['category_slug'])
+        )
+        page_obj = category.posts(manager='published').all().select_related(
             'category', 'location', 'author'
         ).annotate(comment_count=Count('comments')).order_by(
             '-pub_date')
+        return page_obj
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['category'] = get_object_or_404(
-            Category.objects.filter(
-                is_published=True,
-                slug=self.kwargs['category_slug']))
+        context['category'] = get_object_or_404(Category.objects.filter(
+            is_published=True,
+            slug=self.kwargs['category_slug'])
+        )
         return context
 
 
@@ -172,25 +174,33 @@ class CommentDeleteView(OnlyAuthorMixin, DeleteView):
             kwargs={'pk': self.kwargs['pk']})
 
 
-class ProfileDetailView(LoginRequiredMixin, DetailView):
+class ProfileDetailView(DetailView):
     model = User
     template_name = 'blog/profile.html'
 
-    def get(self, request):
-        profile = get_object_or_404(User, username=self.kwargs['username'])
-        if self.request.user == profile:
-            queryset = profile.posts.all().select_related(
+    def get_object(self):
+        return get_object_or_404(User, username=self.kwargs['username'])
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        posts = self.get_related_posts()
+        context['profile'] = get_object_or_404(User, username=self.kwargs['username'])
+        context['page_obj'] = posts
+        return context
+
+    def get_related_posts(self):
+        if self.request.user.id == self.object.id:
+            queryset = self.object.posts.all().select_related(
                 'category', 'location').annotate(
                     comment_count=Count('comments')).order_by('-pub_date')
         else:
-            queryset = profile.posts(manager='published').select_related(
+            queryset = self.object.posts(manager='published').select_related(
                 'category', 'location').annotate(
                     comment_count=Count('comments')).order_by('-pub_date')
         paginator = Paginator(queryset, PAGE_COUNT)
         page = self.request.GET.get('page')
-        page_obj = paginator.get_page(page)
-        context = {'profile': profile, 'page_obj': page_obj}
-        return render(request, self.template_name, context)
+        posts = paginator.get_page(page)
+        return posts
 
 
 class ProfileUpdateView(OnlyUserMixin, UpdateView):
