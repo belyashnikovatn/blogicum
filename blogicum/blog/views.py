@@ -106,25 +106,12 @@ class PostDeleteView(OnlyAuthorMixin, DeleteView):
     form_class = PostForm
     template_name = 'blog/create.html'
 
-    # def get(self, request, *args, **kwargs):
-    #     self.object = self.get_object()
-    #     context = self.get_context_data(object=self.object)
-    #     return self.render_to_response(context)
-
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     # instance = get_object_or_404(Post, self.kwargs['pk'])
-    #     # context['form'] = PostForm(instance=instance)
-    #     return context
-
-    # def form_valid(self, form):
-    #     return super().form_valid(form)
-
-    # def get_form(self, form_class=PostForm):
-    #     """Return an instance of the form to be used in this view."""
-    #     if form_class is None:
-    #         form_class = self.get_form_class()
-    #     return form_class(**self.get_form_kwargs())
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        instance = get_object_or_404(Post, pk=self.kwargs['pk'])
+        context['form'] = PostForm(instance=instance)
+        context['post'] = instance
+        return context
 
     def get_success_url(self):
         return reverse_lazy(
@@ -188,21 +175,6 @@ class CommentDeleteView(OnlyAuthorMixin, DeleteView):
         return reverse_lazy('blog:post_detail', kwargs={'pk': self.kwargs['pk']})
 
 
-
-
-@login_required
-def delete_comment(request, pk, comment_id):
-    instance = get_object_or_404(Comment, pk=comment_id)
-    if instance.author != request.user:
-        return redirect('blog:post_detail', pk=pk)
-    form = CommentForm(request.POST or None, instance=instance)
-    context = {'form': form}
-    if request.method == 'POST':
-        instance.delete()
-        return redirect('blog:post_detail', pk=pk)
-    return render(request, 'blog/create.html', context)
-
-
 class ProfileDetailView(LoginRequiredMixin, DetailView):
     model = User
     template_name = 'blog/profile.html'
@@ -233,7 +205,7 @@ class ProfileDetailView(LoginRequiredMixin, DetailView):
         return posts
 
 
-class ProfileUpdateView(LoginRequiredMixin, OnlyUserMixin, UpdateView):
+class ProfileUpdateView(OnlyUserMixin, UpdateView):
     model = User
     form_class = ProfileForm
     template_name = 'blog/user.html'
