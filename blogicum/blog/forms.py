@@ -1,8 +1,5 @@
 from django import forms
 from django.contrib.auth import get_user_model
-from django.core.files.base import File
-from django.db.models.base import Model
-from django.forms.utils import ErrorList
 from django.utils import timezone
 
 from blog.models import Comment, Post
@@ -20,7 +17,7 @@ class PostForm(forms.ModelForm):
 
     class Meta:
         model = Post
-        fields = ('title', 'text', 'image', 'location', 'category', 'pub_date',)
+        fields = ('title', 'text', 'image', 'location', 'category', 'pub_date')
         widgets = {
             'pub_date': forms.DateTimeInput(
                 format='%Y-%m-%dT%H:%M',

@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.core.paginator import Paginator
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
@@ -184,7 +183,8 @@ class ProfileDetailView(ListView):
     paginate_by = PAGE_COUNT
 
     def get_queryset(self):
-        self.profile = get_object_or_404(User, username=self.kwargs['username'])
+        self.profile = get_object_or_404(User,
+                                         username=self.kwargs['username'])
         if self.request.user == self.profile:
             page_obj = self.profile.posts.select_related(
                 'category', 'location').annotate(
