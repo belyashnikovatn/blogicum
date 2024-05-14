@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.paginator import Paginator
 from django.db.models import Count
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
                                   UpdateView)
@@ -103,7 +103,7 @@ class PostDeleteView(OnlyAuthorMixin, DeleteView):
         context = super().get_context_data(**kwargs)
         instance = get_object_or_404(Post, pk=self.kwargs['pk'])
         context['form'] = PostForm(instance=instance)
-        context['post'] = instance
+        # context['post'] = instance
         return context
 
     def get_success_url(self):
@@ -117,6 +117,13 @@ class PostDetailView(LoginRequiredMixin, DetailView):
     model = Post
     paginate_by = PAGE_COUNT
     template_name = 'blog/detail.html'
+
+    def get_object(self):
+        post_object = get_object_or_404(Post, pk=self.kwargs['pk'])
+        if post_object.author == self.request.user:
+            return post_object
+        else:
+            return get_object_or_404(Post.published, pk=self.kwargs['pk'])
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
