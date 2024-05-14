@@ -1,11 +1,9 @@
-from typing import Any, Mapping
 from django import forms
 from django.contrib.auth import get_user_model
 from django.core.files.base import File
 from django.db.models.base import Model
 from django.forms.utils import ErrorList
 from django.utils import timezone
-
 
 from blog.models import Comment, Post
 

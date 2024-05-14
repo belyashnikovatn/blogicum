@@ -15,6 +15,7 @@ PAGE_COUNT = 10
 
 
 class OnlyUserMixin(UserPassesTestMixin):
+    """Current user checking (to update profile e.g.)"""
 
     def test_func(self):
         object = self.get_object()
@@ -22,6 +23,7 @@ class OnlyUserMixin(UserPassesTestMixin):
 
 
 class OnlyAuthorMixin(UserPassesTestMixin):
+    """Authorship checking"""
 
     def handle_no_permission(self):
         return redirect('blog:post_detail', self.kwargs['pk'])
@@ -47,11 +49,11 @@ class CategoryPostListView(ListView):
     template_name = 'blog/category.html'
 
     def get_queryset(self):
-        category = get_object_or_404(Category.objects.filter(
+        self.category = get_object_or_404(Category.objects.filter(
             is_published=True,
             slug=self.kwargs['category_slug'])
         )
-        page_obj = category.posts(manager='published').all().select_related(
+        page_obj = self.category.posts(manager='published').select_related(
             'category', 'location', 'author'
         ).annotate(comment_count=Count('comments')).order_by(
             '-pub_date')
@@ -59,10 +61,7 @@ class CategoryPostListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['category'] = get_object_or_404(Category.objects.filter(
-            is_published=True,
-            slug=self.kwargs['category_slug'])
-        )
+        context['category'] = self.category
         return context
 
 
@@ -78,7 +77,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         return reverse_lazy(
             'blog:profile',
-            kwargs={'username': self.request.user.username}
+            kwargs={'username': self.request.user}
         )
 
 
@@ -103,7 +102,6 @@ class PostDeleteView(OnlyAuthorMixin, DeleteView):
         context = super().get_context_data(**kwargs)
         instance = get_object_or_404(Post, pk=self.kwargs['pk'])
         context['form'] = PostForm(instance=instance)
-        # context['post'] = instance
         return context
 
     def get_success_url(self):
@@ -181,33 +179,27 @@ class CommentDeleteView(OnlyAuthorMixin, DeleteView):
             kwargs={'pk': self.kwargs['pk']})
 
 
-class ProfileDetailView(DetailView):
-    model = User
+class ProfileDetailView(ListView):
     template_name = 'blog/profile.html'
+    paginate_by = PAGE_COUNT
 
-    def get_object(self):
-        return get_object_or_404(User, username=self.kwargs['username'])
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        posts = self.get_related_posts()
-        context['profile'] = get_object_or_404(User, username=self.kwargs['username'])
-        context['page_obj'] = posts
-        return context
-
-    def get_related_posts(self):
-        if self.request.user.id == self.object.id:
-            queryset = self.object.posts.all().select_related(
+    def get_queryset(self):
+        self.profile = get_object_or_404(User, username=self.kwargs['username'])
+        if self.request.user == self.profile:
+            page_obj = self.profile.posts.select_related(
                 'category', 'location').annotate(
                     comment_count=Count('comments')).order_by('-pub_date')
         else:
-            queryset = self.object.posts(manager='published').select_related(
+            page_obj = self.profile.posts(manager='published').select_related(
                 'category', 'location').annotate(
                     comment_count=Count('comments')).order_by('-pub_date')
-        paginator = Paginator(queryset, PAGE_COUNT)
-        page = self.request.GET.get('page')
-        posts = paginator.get_page(page)
-        return posts
+        return page_obj
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user'] = self.request.user
+        context['profile'] = self.profile
+        return context
 
 
 class ProfileUpdateView(OnlyUserMixin, UpdateView):
@@ -222,6 +214,6 @@ class ProfileUpdateView(OnlyUserMixin, UpdateView):
         return reverse(
             'blog:profile',
             kwargs={
-                'username': get_object_or_404(User, id=self.request.user.id)
+                'username': self.object
             }
         )
