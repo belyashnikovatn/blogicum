@@ -1,36 +1,42 @@
 {% extends "base.html" %}
 {% load django_bootstrap5 %}
 {% block title %}
-  {% if '/edit_comment/' in request.path %}
-    Редактирование комментария
-  {% else %}
-    Удаление комментария
-  {% endif %}
+  {% with request.resolver_match.view_name as view_name %}
+    {% if view_name == 'blog:edit_comment' %}
+      Редактирование комментария
+    {% else %}
+      Удаление комментария
+    {% endif %}
+  {% endwith %}
 {% endblock %}
 {% block content %}
   {% if user.is_authenticated %}
     <div class="col d-flex justify-content-center">
       <div class="card" style="width: 40rem;">
         <div class="card-header">
-          {% if '/edit_comment/' in request.path %}
-            Редактирование комментария
-          {% else %}
-            Удаление комментария
-          {% endif %}
+          {% with request.resolver_match.view_name as view_name %}
+            {% if view_name == 'blog:edit_comment' %}
+              Редактирование комментария
+            {% else %}
+              Удаление комментария
+            {% endif %}
+          {% endwith %}
         </div>
         <div class="card-body">
-          <form method="post"
-            {% if '/edit_comment/' in request.path %}
-              action="{% url 'blog:edit_comment' comment.post_id comment.id %}"
-            {% endif %}>
-            {% csrf_token %}
-            {% if not '/delete_comment/' in request.path %}
+          {% with request.resolver_match.view_name as view_name %}
+            <form method="post"
+              {% if view_name == 'blog:edit_comment' %}
+                action="{% url 'blog:edit_comment' comment.post_id comment.id %}"
+              {% endif %}>
+              {% csrf_token %}
+              {% if view_name != 'blog:delete_comment' %}
               {% bootstrap_form form %}
-            {% else %}
+              {% else %}
               <p>{{ comment.text }}</p>
-            {% endif %}
-            {% bootstrap_button button_type="submit" content="Отправить" %}
-          </form>
+              {% endif %}
+              {% bootstrap_button button_type="submit" content="Отправить" %}
+            </form>
+          {% endwith %}  
         </div>
       </div>
     </div>
