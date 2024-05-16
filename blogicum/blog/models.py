@@ -6,13 +6,19 @@ User = get_user_model()
 
 
 class Location(models.Model):
-    name = models.CharField(max_length=256, verbose_name='Название места')
+    name = models.CharField(
+        max_length=256,
+        verbose_name='Название места',
+        help_text='Напишите название локации')
     is_published = models.BooleanField(
-        default=True, verbose_name='Опубликовано',
+        default=True,
+        verbose_name='Опубликовано',
         help_text='Снимите галочку, чтобы скрыть публикацию.'
     )
     created_at = models.DateTimeField(
-        auto_now_add=True, verbose_name='Добавлено'
+        auto_now_add=True,
+        verbose_name='Добавлено',
+        help_text='Дата и время добавления, автоматически'
     )
 
     class Meta:
@@ -24,8 +30,11 @@ class Location(models.Model):
 
 
 class Category(models.Model):
-    title = models.CharField(max_length=256, verbose_name='Заголовок')
-    description = models.TextField(verbose_name='Описание')
+    title = models.CharField(max_length=256,
+                             verbose_name='Заголовок',
+                             help_text='Напишите заголовок категории')
+    description = models.TextField(verbose_name='Описание',
+                                   help_text='Напишите описание категории')
     slug = models.SlugField(
         unique=True, verbose_name='Идентификатор',
         help_text=('Идентификатор страницы для URL; разрешены '
@@ -36,7 +45,8 @@ class Category(models.Model):
         help_text='Снимите галочку, чтобы скрыть публикацию.'
     )
     created_at = models.DateTimeField(
-        auto_now_add=True, verbose_name='Добавлено'
+        auto_now_add=True, verbose_name='Добавлено',
+        help_text='Дата и время добавления, автоматически'
     )
 
     class Meta:
@@ -59,8 +69,11 @@ class PublishedManager(models.Manager):
 
 
 class Post(models.Model):
-    title = models.CharField(max_length=256, verbose_name='Заголовок')
-    text = models.TextField(verbose_name='Текст')
+    title = models.CharField(max_length=256,
+                             verbose_name='Заголовок',
+                             help_text='Напишите заголовок публикации')
+    text = models.TextField(verbose_name='Текст',
+                            help_text='Напишите текст публикации')
     pub_date = models.DateTimeField(
         verbose_name='Дата и время публикации',
         help_text=('Если установить дату и время в будущем '
@@ -69,30 +82,35 @@ class Post(models.Model):
     author = models.ForeignKey(
         User, on_delete=models.CASCADE,
         related_name='posts',
-        verbose_name='Автор публикации'
+        verbose_name='Автор публикации',
+        help_text='Выберите автора публикации'
     )
     location = models.ForeignKey(
         Location, on_delete=models.SET_NULL,
         null=True, blank=True,
         related_name='posts',
-        verbose_name='Местоположение'
+        verbose_name='Местоположение',
+        help_text='Выберите место публикации'
     )
     category = models.ForeignKey(
         Category, on_delete=models.SET_NULL,
         null=True,
         related_name='posts',
-        verbose_name='Категория'
+        verbose_name='Категория',
+        help_text='Выберите категорию публикации'
     )
     is_published = models.BooleanField(
         default=True, verbose_name='Опубликовано',
         help_text='Снимите галочку, чтобы скрыть публикацию.'
     )
     created_at = models.DateTimeField(
-        auto_now_add=True, verbose_name='Добавлено'
+        auto_now_add=True, verbose_name='Добавлено',
+        help_text='Дата и время добавления, автоматически'
     )
-    image = models.ImageField('Изображение',
+    image = models.ImageField(verbose_name='Изображение',
                               upload_to='posts_images',
-                              blank=True)
+                              blank=True,
+                              help_text='Выберите изображение')
 
     objects = models.Manager()
     published = PublishedManager()
@@ -109,7 +127,7 @@ class Post(models.Model):
 class Comment(models.Model):
     text = models.TextField(
         verbose_name='Текст комментария',
-        help_text=('Напишите комментарий, а люди узнают ваше мнение')
+        help_text=('Напишите комментарий, и люди узнают ваше мнение')
 
     )
     post = models.ForeignKey(
@@ -117,18 +135,18 @@ class Comment(models.Model):
         on_delete=models.CASCADE,
         related_name='comments',
         verbose_name='Комментируемый пост',
-        help_text='К этому посту вы оставляете комментарий'
+        help_text='К этой публикации вы оставляете комментарий'
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Добавлено',
-        help_text='Дата и время'
+        help_text='Дата и время добавления, автоматически'
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         verbose_name='Автор поста',
-        help_text='Комментатор',
+        help_text='Выберите автора комментария',
         related_name='comments')
 
     class Meta:
