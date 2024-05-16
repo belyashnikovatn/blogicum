@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from blog.models import Category, Location, Post
+from blog.models import Category, Location, Post, Comment
 
 
 @admin.register(Post)
@@ -30,4 +30,14 @@ class LocationAdmin(admin.ModelAdmin):
     list_display = (
         'name',
         'is_published'
+    )
+
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = (
+        'text',
+        'post',
+        'created_at',
+        'author'
     )

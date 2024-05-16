@@ -6,17 +6,19 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
                                   UpdateView)
 
+from blogicum.settings import PAGE_COUNT
+
 from blog.forms import CommentForm, PostForm, ProfileForm
 from blog.models import Category, Comment, Post
 
 User = get_user_model()
-PAGE_COUNT = 10
 
 
 class OnlyUserMixin(UserPassesTestMixin):
     """Current user checking (to update profile e.g.)"""
 
     def test_func(self):
+        """Check a user is the current user"""
         object = self.get_object()
         return object == self.request.user
 
@@ -25,9 +27,10 @@ class OnlyAuthorMixin(UserPassesTestMixin):
     """Authorship checking"""
 
     def handle_no_permission(self):
-        return redirect('blog:post_detail', self.kwargs['pk'])
+        return redirect('blog:post_detail', self.kwargs.get('pk'))
 
     def test_func(self):
+        """Check the author of object is the current user"""
         object = self.get_object()
         return object.author == self.request.user
 
@@ -50,7 +53,7 @@ class CategoryPostListView(ListView):
     def get_queryset(self):
         self.category = get_object_or_404(Category.objects.filter(
             is_published=True,
-            slug=self.kwargs['category_slug'])
+            slug=self.kwargs.get('category_slug'))
         )
         page_obj = self.category.posts(manager='published').select_related(
             'category', 'location', 'author'
@@ -88,7 +91,7 @@ class PostUpdateView(OnlyAuthorMixin, UpdateView):
     def get_success_url(self):
         return reverse_lazy(
             'blog:post_detail',
-            kwargs={'pk': self.kwargs['pk']}
+            kwargs={'pk': self.kwargs.get('pk')}
         )
 
 
@@ -99,7 +102,7 @@ class PostDeleteView(OnlyAuthorMixin, DeleteView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        instance = get_object_or_404(Post, pk=self.kwargs['pk'])
+        instance = get_object_or_404(Post, pk=self.kwargs.get('pk'))
         context['form'] = PostForm(instance=instance)
         return context
 
@@ -116,11 +119,10 @@ class PostDetailView(LoginRequiredMixin, DetailView):
     template_name = 'blog/detail.html'
 
     def get_object(self):
-        post_object = get_object_or_404(Post, pk=self.kwargs['pk'])
+        post_object = get_object_or_404(Post, pk=self.kwargs.get('pk'))
         if post_object.author == self.request.user:
             return post_object
-        else:
-            return get_object_or_404(Post.published, pk=self.kwargs['pk'])
+        return get_object_or_404(Post.published, pk=self.kwargs.get('pk'))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -136,7 +138,7 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
     form_class = CommentForm
 
     def dispatch(self, request, *args, **kwargs):
-        self.post_obj = get_object_or_404(Post, pk=kwargs['pk'])
+        self.post_obj = get_object_or_404(Post, pk=kwargs.get('pk'))
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
@@ -156,12 +158,12 @@ class CommentUpdateView(OnlyAuthorMixin, UpdateView):
     template_name = 'blog/comment.html'
 
     def get_object(self):
-        return get_object_or_404(Comment, pk=self.kwargs['comment_id'])
+        return get_object_or_404(Comment, pk=self.kwargs.get('comment_id'))
 
     def get_success_url(self):
         return reverse_lazy(
             'blog:post_detail',
-            kwargs={'pk': self.kwargs['pk']})
+            kwargs={'pk': self.kwargs.get('pk')})
 
 
 class CommentDeleteView(OnlyAuthorMixin, DeleteView):
@@ -170,12 +172,12 @@ class CommentDeleteView(OnlyAuthorMixin, DeleteView):
     template_name = 'blog/comment.html'
 
     def get_object(self):
-        return get_object_or_404(Comment, pk=self.kwargs['comment_id'])
+        return get_object_or_404(Comment, pk=self.kwargs.get('comment_id'))
 
     def get_success_url(self):
         return reverse_lazy(
             'blog:post_detail',
-            kwargs={'pk': self.kwargs['pk']})
+            kwargs={'pk': self.kwargs.get('pk')})
 
 
 class ProfileDetailView(ListView):
@@ -184,7 +186,7 @@ class ProfileDetailView(ListView):
 
     def get_queryset(self):
         self.profile = get_object_or_404(User,
-                                         username=self.kwargs['username'])
+                                         username=self.kwargs.get('username'))
         if self.request.user == self.profile:
             page_obj = self.profile.posts.select_related(
                 'category', 'location').annotate(
