@@ -188,14 +188,12 @@ class ProfileDetailView(ListView):
         self.profile = get_object_or_404(User,
                                          username=self.kwargs.get('username'))
         if self.request.user == self.profile:
-            page_obj = self.profile.posts.select_related(
+            return self.profile.posts.select_related(
                 'category', 'location').annotate(
                     comment_count=Count('comments')).order_by('-pub_date')
-        else:
-            page_obj = self.profile.posts(manager='published').select_related(
-                'category', 'location').annotate(
-                    comment_count=Count('comments')).order_by('-pub_date')
-        return page_obj
+        return self.profile.posts(manager='published').select_related(
+            'category', 'location').annotate(
+                comment_count=Count('comments')).order_by('-pub_date')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
