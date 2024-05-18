@@ -109,7 +109,7 @@ class PostDeleteView(OnlyAuthorMixin, DeleteView):
     def get_success_url(self):
         return reverse_lazy(
             'blog:profile',
-            kwargs={'username': self.request.user}
+            kwargs={'username': self.request.user.username}
         )
 
 
