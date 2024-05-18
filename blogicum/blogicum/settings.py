@@ -33,7 +33,11 @@ DEBUG = True
 #     'localhost',
 #     '127.0.0.1',
 # ]
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'www.belyashnikovatn.pythonanywhere.com'
+    'belyashnikovatn.pythonanywhere.com'
+]
 
 
 # Application definition
