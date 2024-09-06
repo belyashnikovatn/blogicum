@@ -1,13 +1,12 @@
-FROM python:3.9
+FROM python:3.9-slim
 
-WORKDIR /app
-
-RUN pip install gunicorn==20.1.0
+RUN pip install --upgrade pip
 
 COPY requirements.txt .
 
 RUN pip install -r requirements.txt --no-cache-dir
 
-COPY .  .
+COPY . /app
+WORKDIR /app
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "backend.wsgi"]
+ENTRYPOINT [ "sh", "entrypoint.sh" ]
