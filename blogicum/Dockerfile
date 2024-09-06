@@ -4,8 +4,8 @@ WORKDIR /app
 
 COPY requirements.txt .
 
-RUN pip install -r requirements.txt --no-cache-dir
+RUN pip install -r ./requirements.txt --no-cache-dir
 
 COPY . .
 
-CMD [ "gunicorn", "bind", "0.0.0.0:8080", "blogicum.blogicum.wsgi" ]
+CMD [ "gunicorn", "bind", "0.0.0.0:8080", "blogicum.wsgi" ]
