@@ -10,8 +10,8 @@ services:
 
   gateway:
     image: nginx
+    env_file: .env
     volumes:
-      - ./default.conf:/etc/nginx/conf.d/default.conf
       - static:/nginx-data
     ports:
-      - "80:80"
+      - 8080:80
