@@ -14,4 +14,4 @@ services:
     volumes:
       - static:/nginx-data
     ports:
-      - 8080:80
+      - 7000:80
