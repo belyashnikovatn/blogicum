@@ -1,4 +1,4 @@
-name: Main Blogicum Workflowd
+name: Main Blogicum Workflow
 on:
     push:
         branches:
