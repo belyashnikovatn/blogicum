@@ -14,4 +14,4 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
       - static:/nginx-data
     ports:
-      - 8080:80
+      - 80:80
