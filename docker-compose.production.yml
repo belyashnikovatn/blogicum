@@ -9,7 +9,7 @@ services:
       - static:/backend_static
 
   gateway:
-    image: nginx
+    image: belyashnikovatn/blogicum_gateway
     env_file: .env
     volumes:
       - static:/nginx-data
