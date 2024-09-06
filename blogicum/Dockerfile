@@ -1,11 +1,11 @@
 FROM python:3.9-slim
 
-WORKDIR /app
 
-COPY requirements.txt .
+COPY blogicum/requirements.txt .
 
 RUN pip install -r requirements.txt --no-cache-dir
 
-COPY . .
+COPY . /app
+WORKDIR /app
 
 CMD [ "gunicorn", "bind", "0.0.0.0:8080", "blogicum.wsgi" ]
