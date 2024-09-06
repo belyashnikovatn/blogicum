@@ -6,12 +6,12 @@ services:
     image: belyashnikovatn/blogicum_backend
     env_file: .env
     volumes:
-      - static:/staticfiles
+      - static:/backend_static
 
   gateway:
     image: belyashnikovatn/blogicum_gateway
     env_file: .env
     volumes:
-      - static:/staticfiles/
+      - static:/static/
     ports:
       - 7000:80
