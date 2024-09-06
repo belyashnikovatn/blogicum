@@ -12,6 +12,6 @@ services:
     image: belyashnikovatn/blogicum_gateway
     env_file: .env
     volumes:
-      - static:/nginx-data
+      - static:/staticfiles/
     ports:
       - 7000:80
