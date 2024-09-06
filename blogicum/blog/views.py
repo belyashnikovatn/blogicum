@@ -3,8 +3,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
-from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
-                                  UpdateView)
+from django.views.generic import (
+    CreateView, DeleteView, DetailView, ListView,
+    UpdateView)
 
 from blogicum.settings import PAGE_COUNT
 
@@ -185,8 +186,9 @@ class ProfileDetailView(ListView):
     paginate_by = PAGE_COUNT
 
     def get_queryset(self):
-        self.profile = get_object_or_404(User,
-                                         username=self.kwargs.get('username'))
+        self.profile = get_object_or_404(
+            User,
+            username=self.kwargs.get('username'))
         if self.request.user == self.profile:
             return self.profile.posts.select_related(
                 'category', 'location').annotate(
