@@ -81,6 +81,7 @@ jobs:
             passphrase: ${{ secrets.SSH_PASSPHRASE }}
             source: "docker-compose.production.yml"
             target: "django_sprint4"
+
         - name: Executing remote ssh commands to deploy
           uses: appleboy/ssh-action@master
           with:
@@ -93,7 +94,8 @@ jobs:
               sudo docker compose -f docker-compose.production.yml pull
               sudo docker compose -f docker-compose.production.yml down
               sudo docker compose -f docker-compose.production.yml up -d
-              sudo docker compose -f docker-compose.production.yml exec blogicum python manage.py migrate
-              sudo docker compose -f docker-compose.production.yml exec blogicum python manage.py collectstatic
-              sudo docker compose -f docker-compose.production.yml exec blogicum cp -r /app/collected_static/. /backend_static/static/
+              cd blogicum
+              sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate
+              sudo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic
+              sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/collected_static/. /backend_static/static/
 
