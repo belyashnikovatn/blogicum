@@ -1,0 +1,15 @@
+volumes:
+  static:
+
+services:
+  blogicum:
+    build: .
+    volumes:
+      - static:/media/static/
+
+  gateway:
+    build: ./nginx/
+    volumes:
+      - static:/staticfiles/
+    ports:
+      - 7000:80

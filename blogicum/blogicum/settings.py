@@ -33,7 +33,7 @@ DEBUG = True
 #     'localhost',
 #     '127.0.0.1',
 # ]
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = '127.0.0.1,localhost,51.250.21.16,blogicum.hopto.org'.split(',')
 
 
 # Application definition
@@ -90,6 +90,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        # 'NAME': '/data/db.sqlite3',
     }
 }
 
@@ -131,6 +132,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
+# STATIC_ROOT = BASE_DIR / 'collected_static'
+STATIC_ROOT = '/collected_static'
+# MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = '/media'
 
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
@@ -146,5 +151,4 @@ EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
 CSRF_FAILURE_VIEW = 'pages.views.csrf_failure'
 LOGIN_REDIRECT_URL = 'blog:index'
 LOGIN_URL = 'login'
-MEDIA_ROOT = BASE_DIR / 'media'
 PAGE_COUNT = 10
