@@ -1,5 +1,8 @@
 FROM python:3.9-slim
 
+RUN mkdir -p /home/app
+RUN addgroup --system app && adduser --system --group app
+
 ENV HOME=/home/app
 ENV APP_HOME=/home/app/blogicum
 RUN mkdir $APP_HOME
