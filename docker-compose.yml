@@ -1,5 +1,5 @@
 volumes:
-  static:
+  static_volume:
   postgres_data:
 
 services:
@@ -15,13 +15,13 @@ services:
   blogicum:
     build: ./blogicum
     volumes:
-      - ./blogicum:/usr/src/blogicum/
+      - static_volume:/home/app/blogicum/staticfiles
     env_file:
       - ./.env.dev
 
   gateway:
     build: ./nginx/
     volumes:
-      - static:/media/posts_images/
+      - static_volume:/home/app/blogicum/staticfiles
     ports:
       - 7000:80

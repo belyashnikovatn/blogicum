@@ -1,5 +1,7 @@
 FROM python:3.9-slim
 
+RUN mkdir /usr/src/app/staticfiles
+
 WORKDIR /usr/src/app
 
 RUN pip install --upgrade pip
