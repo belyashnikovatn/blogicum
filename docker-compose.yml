@@ -16,6 +16,8 @@ services:
     build: ./blogicum
     volumes:
       - ./blogicum:/usr/src/blogicum/
+    env_file:
+      - ./.env.dev
 
   gateway:
     build: ./nginx/
