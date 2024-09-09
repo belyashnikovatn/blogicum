@@ -1,7 +1,6 @@
 volumes:
   static_volume:
   postgres_data:
-  media_volume:
 
 services:
   db:
@@ -17,7 +16,6 @@ services:
     build: ./blogicum
     volumes:
       - static_volume:/home/app/blogicum/staticfiles
-      - media_volume:/home/app/blogicum/media
     env_file:
       - ./.env.dev
 
@@ -25,6 +23,5 @@ services:
     build: ./nginx/
     volumes:
       - static_volume:/home/app/blogicum/staticfiles
-      - media_volume:/home/app/blogicum/media
     ports:
       - 7000:80
