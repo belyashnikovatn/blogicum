@@ -17,7 +17,7 @@ services:
     volumes:
       - static_volume:/home/app/blogicum/staticfiles
     env_file:
-      - ./.env.dev
+      - ./.env
 
   gateway:
     build: ./nginx/
