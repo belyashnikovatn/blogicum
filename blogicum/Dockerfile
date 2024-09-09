@@ -7,7 +7,6 @@ ENV HOME=/home/app
 ENV APP_HOME=/home/app/blogicum
 RUN mkdir $APP_HOME
 RUN mkdir $APP_HOME/staticfiles
-RUN mkdir $APP_HOME/mediafiles
 WORKDIR $APP_HOME
 
 RUN pip install --upgrade pip
