@@ -1,17 +1,29 @@
 volumes:
-  static:
+  static_volume:
+  postgres_data:
 
 services:
-  backend:
-    image: belyashnikovatn/blogicum_backend
+  db:
+    image: postgres:15
     env_file: .env
     volumes:
-      - static:/backend_static
+      - postgres_data:/var/lib/postgresql/data/
+
+  blogicum:
+    image: belyashnikovatn/blogicum
+    volumes:
+      - static_volume:/home/app/blogicum/staticfiles
+    env_file:
+      - .env
+    depends_on:
+      - db
 
   gateway:
     image: belyashnikovatn/blogicum_gateway
     env_file: .env
     volumes:
-      - static:/static/
+      - static_volume:/home/app/blogicum/staticfiles
     ports:
       - 7000:80
+    depends_on:
+      - blogicum
