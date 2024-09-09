@@ -1,15 +1,22 @@
 volumes:
   static:
+  pg_data:
 
 services:
+  db:
+    image: postgres:13.10
+    env_file: .env
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
   blogicum:
     build: .
     volumes:
-      - static:/media/static/
+      - static:/static/
 
   gateway:
     build: ./nginx/
     volumes:
-      - static:/staticfiles/
+      - static:/static/
     ports:
       - 7000:80
