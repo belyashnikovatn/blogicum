@@ -30,3 +30,4 @@ tomli==2.0.1
 yapf==0.32.0
 python-dotenv
 gunicorn
+psycopg2-binary==2.9.6

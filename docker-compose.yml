@@ -1,16 +1,25 @@
 volumes:
   static:
+  postgres_data:
 
 services:
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=hello_django
+      - POSTGRES_PASSWORD=hello_django
+      - POSTGRES_DB=hello_django_dev
 
   blogicum:
-    build: .
+    build: ./blogicum
     volumes:
-      - static:/static/
+      - ./blogicum:/usr/src/blogicum/
 
   gateway:
     build: ./nginx/
     volumes:
-      - static/media:/var/www/media/posts_images/
+      - static:/media/posts_images/
     ports:
       - 7000:80
