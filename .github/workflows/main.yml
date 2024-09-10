@@ -110,7 +110,7 @@ jobs:
               cd django_sprint4
               sudo docker compose -f docker-compose.production.yml pull
               sudo docker compose -f docker-compose.production.yml down
-              sudo docker compose -f docker-compose.production.yml up -d --build
+              sudo docker compose -f docker-compose.production.yml up -d
               sudo docker compose -f docker-compose.production.yml exec blogicum python manage.py migrate
               sudo docker compose -f docker-compose.production.yml exec blogicum python manage.py collectstatic --no-input --clear
 
