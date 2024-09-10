@@ -89,7 +89,7 @@ else:
             'PORT': os.getenv('DB_PORT', 5432)
         }
     }
-
+print(os.getenv('POSTGRES_USER', 'django'))
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
