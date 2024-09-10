@@ -4,8 +4,12 @@ volumes:
 
 services:
   db:
-    image: postgres:13.10
-    env_file: ./.env
+    image: postgres
+    environment:
+      POSTGRES_DB: "habrdb"
+      POSTGRES_USER: "habrpguser"
+      POSTGRES_PASSWORD: "pgpwd4habr"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
     volumes:
       - pg_data:/var/lib/postgresql/data
     ports:
