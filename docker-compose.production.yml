@@ -7,8 +7,7 @@ volumes:
 services:
   db:
     image: postgres:13.10
-    env_file:
-      - .env
+    env_file: .env
     volumes:
       - pg_data:/var/lib/postgresql/data
 
@@ -16,8 +15,7 @@ services:
     image: belyashnikovatn/blogicum
     volumes:
       - static:/home/app/blogicum/staticfiles
-    env_file:
-      - .env
+    env_file: .env
     depends_on:
       - db
 

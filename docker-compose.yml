@@ -7,20 +7,17 @@ services:
     image: postgres:13.10
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-    environment:
-      - POSTGRES_USER=hello_django
-      - POSTGRES_PASSWORD=hello_django
-      - POSTGRES_DB=hello_django_dev
+    env_file: .env
 
   blogicum:
     build: ./blogicum
     volumes:
       - static_volume:/home/app/blogicum/staticfiles
-    env_file:
-      - ./.env
+    env_file: .env
 
   gateway:
     build: ./nginx/
+    env_file: .env
     volumes:
       - static_volume:/home/app/blogicum/staticfiles
     ports:
