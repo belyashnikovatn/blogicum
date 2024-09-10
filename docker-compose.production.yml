@@ -8,12 +8,12 @@ services:
   db:
     image: postgres:13.10
     environment:
-      - POSTGRES_USER: blogicum_user
-      - POSTGRES_PASSWORD: blogicum_password
-      - POSTGRES_DB: blogicum
+      - POSTGRES_USER=blogicum_user
+      - POSTGRES_PASSWORD=blogicum_password
+      - POSTGRES_DB=blogicum
       - PGDATA: /tmp
     volumes:
-      - pg_data:/var/lib/postgresql/data
+      - pg_data:/var/lib/postgresql/data/pgdata
     ports:
       - 5432:5432
 
