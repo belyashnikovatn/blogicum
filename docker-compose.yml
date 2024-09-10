@@ -5,20 +5,19 @@ volumes:
 services:
   db:
     image: postgres:13.10
+    env_file: ./.env
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-    env_file: .env
 
   blogicum:
     build: ./blogicum
+    env_file: ./.env
     volumes:
-      - static_volume:/staticfiles
-    env_file: .env
+      - static_volume:/home/app/blogicum/staticfiles
 
   gateway:
     build: ./nginx/
-    env_file: .env
     volumes:
-      - static_volume:/staticfiles
+      - static_volume:/home/app/blogicum/staticfiles
     ports:
       - 7000:80
