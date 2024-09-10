@@ -15,6 +15,9 @@ COPY ./requirements.txt .
 
 RUN pip install -r requirements.txt --no-cache-dir
 
-COPY . .
+COPY . ${APP_HOME}
+RUN chown -R app:app $APP_HOME
+USER app
+
 
 CMD ["gunicorn", "--bind", "0.0.0.0:7000", "blogicum.wsgi"]
