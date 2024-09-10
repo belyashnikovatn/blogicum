@@ -14,7 +14,7 @@ services:
   blogicum:
     image: belyashnikovatn/blogicum
     volumes:
-      - static:/home/app/blogicum/staticfiles
+      - static:/staticfiles
     env_file: .env
     depends_on:
       - db
@@ -23,7 +23,7 @@ services:
     image: belyashnikovatn/blogicum_gateway
     env_file: .env
     volumes:
-      - static:/home/app/blogicum/staticfiles
+      - static:/staticfiles
     ports:
       - 7000:80
     depends_on:

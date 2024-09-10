@@ -12,13 +12,13 @@ services:
   blogicum:
     build: ./blogicum
     volumes:
-      - static_volume:/home/app/blogicum/staticfiles
+      - static_volume:/staticfiles
     env_file: .env
 
   gateway:
     build: ./nginx/
     env_file: .env
     volumes:
-      - static_volume:/home/app/blogicum/staticfiles
+      - static_volume:/staticfiles
     ports:
       - 7000:80
