@@ -11,8 +11,11 @@ services:
       - POSTGRES_USER=hello_django
       - POSTGRES_PASSWORD=hello_django
       - POSTGRES_DB=hello_django_dev
+      - PGDATA: /tmp
     volumes:
       - pg_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
 
   blogicum:
     image: belyashnikovatn/blogicum
