@@ -1,29 +1,28 @@
 volumes:
-  pg_data:
-  static:
+  pg_data_production:
+  static_volume:
 
 services:
   db:
     image: postgres:13.10
-    restart: always
     env_file: .env
     volumes:
-      - pg_data:/var/lib/postgresql/data
-    ports:
-      - 5432:5432
+      - pg_data_production:/var/lib/postgresql/data
+
 
   blogicum:
     image: belyashnikovatn/blogicum
-    volumes:
-      - static:/home/app/blogicum/staticfiles
     env_file: .env
+    volumes:
+      - static_volume:/home/app/blogicum/staticfiles
     depends_on:
       - db
 
   gateway:
     image: belyashnikovatn/blogicum_gateway
+    env_file: .env
     volumes:
-      - static:/home/app/blogicum/staticfiles
+      - static_volume:/home/app/blogicum/staticfiles
     ports:
       - 7000:80
     depends_on:
