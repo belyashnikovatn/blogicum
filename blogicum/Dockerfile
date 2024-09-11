@@ -7,8 +7,7 @@ ENV HOME=/home/app
 ENV APP_HOME=/home/app/blogicum
 RUN mkdir $APP_HOME
 RUN mkdir $APP_HOME/staticfiles
-RUN mkdir $APP_HOME/media
-RUN mkdir $APP_HOME/media/posts_images
+RUN mkdir $HOME/media
 WORKDIR $APP_HOME
 
 RUN pip install --upgrade pip
@@ -19,6 +18,6 @@ RUN pip install -r requirements.txt --no-cache-dir
 
 COPY . ${APP_HOME}
 RUN chown -R app:app $APP_HOME
-
+USER app
 
 CMD ["gunicorn", "--bind", "0.0.0.0:7000", "blogicum.wsgi"]
