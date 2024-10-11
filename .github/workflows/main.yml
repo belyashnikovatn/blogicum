@@ -113,5 +113,5 @@ jobs:
               sudo docker compose -f docker-compose.production.yml up -d
               sudo docker compose -f docker-compose.production.yml exec blogicum python manage.py makemigrations
               sudo docker compose -f docker-compose.production.yml exec blogicum python manage.py migrate --noinput
-              sudo docker compose -f docker-compose.production.yml exec blogicum python manage.py python manage.py loaddata db.json
+              sudo docker compose -f docker-compose.production.yml exec blogicum python manage.py loaddata db.json
               sudo docker compose -f docker-compose.production.yml exec blogicum python manage.py collectstatic --no-input --clear
